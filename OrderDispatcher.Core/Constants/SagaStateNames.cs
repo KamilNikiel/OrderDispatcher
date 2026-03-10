@@ -5,6 +5,6 @@
         public const string Initial = "Initial";
         public const string WaitingForWarehouseDoc = "WaitingForWarehouseDoc";
         public const string WaitingForOrder = "WaitingForOrder";
-        public const string Finished = "Finished";
+        public const string Final = "Final";
     }
 }

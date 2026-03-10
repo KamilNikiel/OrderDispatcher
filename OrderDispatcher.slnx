@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Mocks/">
+    <Project Path="Mocks/OrderDispatcher.Mocks.Api/OrderDispatcher.Mocks.Api.csproj" />
+    <Project Path="Mocks/OrderDispatcher.Mocks.Ftp/OrderDispatcher.Mocks.Ftp.csproj" Id="1dbb5eda-1bfc-406f-8dcc-fffb99199bba" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".env" />
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Project Path="OrderDispatcher.Core/OrderDispatcher.Core.csproj" />
+  <Project Path="OrderDispatcher.Dashboard/OrderDispatcher.Dashboard.csproj" Id="67bb8cf8-c9f9-4882-905c-28b7c576c3db" />
+  <Project Path="OrderDispatcher.Workers/OrderDispatcher.Workers.csproj" />
+</Solution>

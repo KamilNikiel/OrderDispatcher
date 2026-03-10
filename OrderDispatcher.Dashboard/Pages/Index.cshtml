@@ -1,0 +1,82 @@
+﻿@page
+@model IndexModel
+@using OrderDispatcher.Core.Constants
+@{
+    ViewData["Title"] = "System Dashboard";
+}
+
+<h1>Order Dispatcher Dashboard</h1>
+<hr />
+
+<div style="margin-bottom: 20px; font-size: 1.1em;">
+    <strong>Total Orders:</strong> @Model.TotalOrders |
+    <strong>Completed:</strong> <span style="color: green;">@Model.CompletedOrders</span> |
+    <strong>Pending:</strong> <span style="color: orange;">@Model.PendingOrders</span>
+</div>
+
+@if (Model.DeadLetterMessageCount > 0)
+{
+    <div style="color: red; font-weight: bold; margin-bottom: 20px; padding: 10px; border: 1px solid red; background-color: #ffe6e6;">
+        Alert: There are @Model.DeadLetterMessageCount message(s) stuck in the Dead Letter Queue!
+    </div>
+}
+
+<h2>All System Orders</h2>
+
+@if (Model.AllOrders.Any())
+{
+    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Warehouse Doc</th>
+                <th>Last Updated (UTC)</th>
+                <th>Correlation ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.AllOrders)
+            {
+                var statusColor = order.CurrentState switch
+                {
+                    SagaStateNames.Finished => "green",
+                    SagaStateNames.WaitingForOrder => "orange",
+                    SagaStateNames.WaitingForWarehouseDoc => "blue",
+                    _ => "gray"
+                };
+
+                <tr>
+                    <td><strong>@order.OrderId</strong></td>
+                    <td style="color: @statusColor; font-weight: bold;">
+                        @order.CurrentState
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(order.WarehouseDocumentId))
+                        {
+                            @order.WarehouseDocumentId
+                        }
+                        else
+                        {
+                            <em style="color: gray;">Pending...</em>
+                        }
+                    </td>
+                    <td>@order.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td style="font-size: 0.8em; color: gray;">@order.CorrelationId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>No orders have been processed by the system yet.</em></p>
+}
+
+@section Scripts {
+    <script>
+        setTimeout(function () {
+            window.location.reload();
+        }, 5000);
+    </script>
+}

@@ -1,0 +1,79 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "${RABBITMQ_AMQP_PORT}:5672"
+      - "${RABBITMQ_API_PORT}:15672"
+    networks:
+      - dispatcher-net
+  
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_SA_PASSWORD}
+    ports:
+      - "${SQL_PORT}:1433"
+    networks:
+      - dispatcher-net
+
+  warehousesqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_SA_PASSWORD}
+    ports:
+      - "${WAREHOUSE_DB_SQL_PORT}:1433"
+    networks:
+      - dispatcher-net
+
+  workers:
+    user: "root"
+    build:
+      context: .
+      dockerfile: OrderDispatcher.Workers/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - ConnectionStrings__WarehouseDb=${WAREHOUSE_DB_CONNECTION_STRING}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER}
+      - RabbitMq__Password=${RABBITMQ_PASSWORD}
+      - RabbitMq__Api__Port=${RABBITMQ_API_PORT}
+      - RabbitMq__Amqp__Port=${RABBITMQ_AMQP_PORT}
+      - Ftp__Server__Name=${FTP_SERVER_NAME}
+      - Ftp__Host=${FTP_HOST}
+      - Ftp__Port=${FTP_PORT}
+      - Ftp__Username=${FTP_USER}
+      - Ftp__Password=${FTP_PASSWORD}
+    depends_on:
+      - sqlserver
+      - warehousesqlserver
+      - rabbitmq
+    networks:
+      - dispatcher-net
+    volumes: 
+      - ./${FTP_SERVER_NAME}:/app/${FTP_SERVER_NAME}
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: OrderDispatcher.Dashboard/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Api__Port=${RABBITMQ_API_PORT}
+      - RabbitMq__Username=${RABBITMQ_USER}
+      - RabbitMq__Password=${RABBITMQ_PASSWORD}
+    ports:
+      - "${DASHBOARD_PORT}:8080"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    networks:
+      - dispatcher-net
+
+networks:
+  dispatcher-net:
+    driver: bridge

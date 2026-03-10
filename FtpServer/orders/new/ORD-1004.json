@@ -1,0 +1,15 @@
+{
+  "OrderId": "ORD-1004",
+  "TotalAmount": 150.50,
+  "Customer": {
+    "FullName": "John Doe",
+    "Email": "john@example.com"
+  },
+  "Items": [
+    {
+      "Sku": "PROD-04",
+      "Quantity": 2,
+      "UnitPrice": 75.25
+    }
+  ]
+}
